@@ -78,14 +78,11 @@
 
     <script>
         async function generiereRoute() {
-<<<<<<< HEAD
-            const apiKey = document.getElementById('apiKey').value.trim(); // .trim() entfernt versehentliche Leerzeichen!
+            // 1. Daten auslesen (Merge Konflikt behoben, .trim() behalten)
+            const apiKeyElement = document.getElementById('apiKey');
+            const apiKey = apiKeyElement ? apiKeyElement.value.trim() : ""; 
+            
             const land = document.getElementById('land').value || "einem überraschenden, spannenden Land";
-=======
-            // 1. Daten auslesen
-            const apiKey = document.getElementById('apiKey').value;
-            const land = document.getElementById('land').value || "einem überraschenden, spannenden Land.";
->>>>>>> ad6053a091afa4484f8df316a83b3e4c0ab5a94e
             const jahreszeit = document.getElementById('jahreszeit').value || "der besten Reisezeit";
             const dauer = document.getElementById('dauer').value || "5";
             const interesse = document.getElementById('interesse').value || "lokale Highlights";
@@ -102,6 +99,7 @@
             loader.style.display = 'block';
             document.getElementById('ergebnis').innerHTML = '';
 
+            // Prompt erstellen
             const systemPrompt = `
                 Du bist ein Reiseexperte. Erstelle eine Reiseroute.
                 Ziel: ${land}, Reisezeit: ${jahreszeit}, Dauer: ${dauer} Tage, Interessen: ${interesse}.
@@ -119,14 +117,14 @@
 
                 const data = await response.json();
 
-                // --- FEHLER-ANALYSE (NEU) ---
+                // --- FEHLER-ANALYSE ---
                 
-                // 1. Hat Google einen Fehler gemeldet? (z.B. falscher Key)
+                // 1. Hat Google einen Fehler gemeldet?
                 if (data.error) {
                     throw new Error("Google API Fehler: " + data.error.message);
                 }
 
-                // 2. Ist die Antwort leer? (z.B. Sicherheitsfilter)
+                // 2. Ist die Antwort leer?
                 if (!data.candidates || data.candidates.length === 0) {
                     throw new Error("Die KI hat keine Antwort geliefert (evtl. Sicherheitsfilter oder Überlastung).");
                 }
@@ -134,7 +132,7 @@
                 // --- ERFOLG ---
                 
                 let rawText = data.candidates[0].content.parts[0].text;
-                // Code-Blöcke entfernen, falls die KI welche macht
+                // Code-Blöcke entfernen
                 rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
                 
                 const reiseRoute = JSON.parse(rawText);
