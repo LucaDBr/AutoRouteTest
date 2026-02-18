@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Reise-Generator 🌍</title>
+    <style>
+        /* --- Das Design (CSS) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 { color: #2c3e50; margin-bottom: 0.5rem; }
+        p { color: #7f8c8d; margin-bottom: 2rem; }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        #ergebnis-box {
+            margin-top: 30px;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: none; /* Erst unsichtbar */
+            animation: fadeIn 0.5s;
+        }
+        .route-titel { font-size: 1.2rem; font-weight: bold; color: #2c3e50; }
+        .route-details { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 15px; }
+        .stopps-liste { padding-left: 20px; line-height: 1.6; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🌍 Reise-Entdecker</h1>
+        <p>Lass dich inspirieren! Wohin soll die nächste Reise gehen?</p>
+        
+        <button onclick="starteGenerator()">Zufällige Route finden</button>
+
+        <div id="ergebnis-box">
+            <div class="route-titel" id="output-titel"></div>
+            <div class="route-details" id="output-details"></div>
+            <h3>Die Stopps:</h3>
+            <ul class="stopps-liste" id="output-stopps"></ul>
+        </div>
+    </div>
+
+    <script>
+        /* --- Die Logik (JavaScript) --- */
+        
+        // Hier simulieren wir die API-Antwort (JSON-Format)
+        const beispielDaten = [
+            {
+                titel: "Der japanische Traum",
+                land: "Japan",
+                dauer: "10 Tage",
+                stopps: ["Tokio (Shinjuku)", "Kyoto (Tempel)", "Nara (Rehe füttern)", "Osaka (Streetfood)"]
+            },
+            {
+                titel: "Dolce Vita Roadtrip",
+                land: "Italien",
+                dauer: "7 Tage",
+                stopps: ["Mailand", "Cinque Terre", "Florenz", "Rom"]
+            },
+            {
+                titel: "Mystisches Island",
+                land: "Island",
+                dauer: "5 Tage",
+                stopps: ["Reykjavik", "Golden Circle", "Vik (Schwarzer Strand)", "Gletscherlagune"]
+            }
+        ];
+
+        function starteGenerator() {
+            // 1. Zufälligen Eintrag auswählen (Später hier: API Anfrage!)
+            const zufall = Math.floor(Math.random() * beispielDaten.length);
+            const route = beispielDaten[zufall];
+
+            // 2. Daten in das HTML einfügen
+            document.getElementById('output-titel').innerText = route.titel;
+            document.getElementById('output-details').innerText = `${route.land} • ${route.dauer}`;
+            
+            // Stopps-Liste leeren und neu befüllen
+            const liste = document.getElementById('output-stopps');
+            liste.innerHTML = ""; // Altes löschen
+            
+            route.stopps.forEach(stopp => {
+                const li = document.createElement('li');
+                li.innerText = stopp;
+                liste.appendChild(li);
+            });
+
+            // 3. Ergebnis-Box sichtbar machen
+            document.getElementById('ergebnis-box').style.display = "block";
+        }
+    </script>
+</body>
+</html>
