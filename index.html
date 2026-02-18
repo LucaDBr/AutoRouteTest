@@ -3,125 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein Reise-Generator 🌍</title>
+    <title>KI Reise-Planer ✈️</title>
     <style>
-        /* --- Das Design (CSS) --- */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-        }
-        h1 { color: #2c3e50; margin-bottom: 0.5rem; }
-        p { color: #7f8c8d; margin-bottom: 2rem; }
+        :root { --primary: #007AFF; --bg: #F5F5F7; --card: #FFFFFF; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: #333; display: flex; justify-content: center; padding: 20px; }
+        .container { background: var(--card); width: 100%; max-width: 600px; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
         
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-        button:hover {
-            background-color: #2980b9;
-            transform: scale(1.05);
-        }
+        h1 { text-align: center; margin-bottom: 20px; }
         
-        #ergebnis-box {
-            margin-top: 30px;
-            text-align: left;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-            display: none; /* Erst unsichtbar */
-            animation: fadeIn 0.5s;
-        }
-        .route-titel { font-size: 1.2rem; font-weight: bold; color: #2c3e50; }
-        .route-details { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 15px; }
-        .stopps-liste { padding-left: 20px; line-height: 1.6; }
+        /* Eingabefelder Styling */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box; }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* API Key Feld (Wichtig!) */
+        .api-box { background: #eef; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ccd; }
+        .api-box input { background: white; }
+
+        button { width: 100%; background-color: var(--primary); color: white; border: none; padding: 15px; font-size: 1.1rem; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { opacity: 0.9; transform: scale(0.99); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* Lade-Animation */
+        .loader { display: none; text-align: center; margin: 20px 0; }
+        
+        /* Ergebnis Liste */
+        #ergebnis { margin-top: 30px; list-style: none; padding: 0; }
+        .reise-tag { background: #f9f9f9; border-left: 5px solid var(--primary); padding: 15px; margin-bottom: 15px; border-radius: 8px; animation: slideIn 0.5s ease; }
+        .tag-nummer { font-weight: bold; color: var(--primary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        .ort { font-weight: bold; font-size: 1.2rem; margin: 5px 0; }
+        .aktivitaet { color: #555; line-height: 1.5; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🌍 Reise-Entdecker</h1>
-        <p>Lass dich inspirieren! Wohin soll die nächste Reise gehen?</p>
-        
-        <button onclick="starteGenerator()">Zufällige Route finden</button>
+        <h1>🌍 Dein Smart-Travel Guide</h1>
 
-        <div id="ergebnis-box">
-            <div class="route-titel" id="output-titel"></div>
-            <div class="route-details" id="output-details"></div>
-            <h3>Die Stopps:</h3>
-            <ul class="stopps-liste" id="output-stopps"></ul>
+        <div class="api-box">
+            <label>🔑 Dein Google Gemini API Key:</label>
+            <input type="password" id="apiKey" placeholder="Hier Key einfügen (wird nicht gespeichert)">
         </div>
+
+        <div class="form-group">
+            <label>Wohin solls gehen? (Leer lassen für Zufall)</label>
+            <input type="text" id="land" placeholder="z.B. Japan, Italien, Norwegen...">
+        </div>
+
+        <div class="form-group">
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Jahreszeit</label>
+                    <input type="text" id="jahreszeit" placeholder="z.B. Sommer">
+                </div>
+                <div style="flex: 1;">
+                    <label>Dauer (Tage)</label>
+                    <input type="number" id="dauer" value="3" min="1" max="14">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Interessen / Vibe</label>
+            <input type="text" id="interesse" placeholder="z.B. Wandern, Essen, Kultur, Party">
+        </div>
+
+        <button onclick="generiereRoute()" id="btn">Route erstellen 🚀</button>
+        
+        <div class="loader" id="loader">KI denkt nach... 🤔</div>
+        <ul id="ergebnis"></ul>
     </div>
 
     <script>
-        /* --- Die Logik (JavaScript) --- */
-        
-        // Hier simulieren wir die API-Antwort (JSON-Format)
-        const beispielDaten = [
-            {
-                titel: "Der japanische Traum",
-                land: "Japan",
-                dauer: "10 Tage",
-                stopps: ["Tokio (Shinjuku)", "Kyoto (Tempel)", "Nara (Rehe füttern)", "Osaka (Streetfood)"]
-            },
-            {
-                titel: "Dolce Vita Roadtrip",
-                land: "Italien",
-                dauer: "7 Tage",
-                stopps: ["Mailand", "Cinque Terre", "Florenz", "Rom"]
-            },
-            {
-                titel: "Mystisches Island",
-                land: "Island",
-                dauer: "5 Tage",
-                stopps: ["Reykjavik", "Golden Circle", "Vik (Schwarzer Strand)", "Gletscherlagune"]
+        async function generiereRoute() {
+            // 1. Daten auslesen
+            const apiKey = document.getElementById('apiKey').value;
+            const land = document.getElementById('land').value || "einem überraschenden, spannenden Land";
+            const jahreszeit = document.getElementById('jahreszeit').value || "der besten Reisezeit";
+            const dauer = document.getElementById('dauer').value || "5";
+            const interesse = document.getElementById('interesse').value || "lokale Highlights und Geheimtipps";
+
+            // Validierung: Key muss da sein
+            if (!apiKey) {
+                alert("Bitte gib erst deinen Google API Key oben ein!");
+                return;
             }
-        ];
 
-        function starteGenerator() {
-            // 1. Zufälligen Eintrag auswählen (Später hier: API Anfrage!)
-            const zufall = Math.floor(Math.random() * beispielDaten.length);
-            const route = beispielDaten[zufall];
+            // UI Updates (Laden anzeigen)
+            document.getElementById('btn').disabled = true;
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('ergebnis').innerHTML = '';
 
-            // 2. Daten in das HTML einfügen
-            document.getElementById('output-titel').innerText = route.titel;
-            document.getElementById('output-details').innerText = `${route.land} • ${route.dauer}`;
-            
-            // Stopps-Liste leeren und neu befüllen
-            const liste = document.getElementById('output-stopps');
-            liste.innerHTML = ""; // Altes löschen
-            
-            route.stopps.forEach(stopp => {
-                const li = document.createElement('li');
-                li.innerText = stopp;
-                liste.appendChild(li);
-            });
+            // 2. Den Prompt bauen (Hier passiert die Magie)
+            const systemPrompt = `
+                Du bist ein erfahrener Reiseexperte. Erstelle eine realistische Reiseroute basierend auf echten Erfahrungen und Travelblogs.
+                
+                Parameter:
+                - Ziel: ${land}
+                - Reisezeit: ${jahreszeit}
+                - Dauer: ${dauer} Tage
+                - Interessen: ${interesse}
 
-            // 3. Ergebnis-Box sichtbar machen
-            document.getElementById('ergebnis-box').style.display = "block";
+                WICHTIG: Antworte AUSSCHLIESSLICH mit einem validen JSON-Array. Keine Einleitung, kein Markdown.
+                Struktur pro Tag:
+                [
+                    { "tag": 1, "ort": "Name des Ortes", "aktivitaet": "Detaillierte Beschreibung was man tut" },
+                    ...
+                ]
+            `;
+
+            // 3. Anfrage an die API senden
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                // 4. Antwort verarbeiten
+                // Oft packt die KI das JSON in ```json ... ``` Blöcke. Die entfernen wir.
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+                
+                const reiseRoute = JSON.parse(rawText);
+
+                // 5. HTML generieren
+                const liste = document.getElementById('ergebnis');
+                
+                reiseRoute.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'reise-tag';
+                    li.innerHTML = `
+                        <div class="tag-nummer">Tag ${item.tag}</div>
+                        <div class="ort">📍 ${item.ort}</div>
+                        <div class="aktivitaet">${item.aktivitaet}</div>
+                    `;
+                    liste.appendChild(li);
+                });
+
+            } catch (error) {
+                console.error(error);
+                alert("Fehler: " + error.message + ". Überprüfe deinen API Key oder die Konsole.");
+            } finally {
+                // Aufräumen (Ladebalken weg)
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('btn').disabled = false;
+            }
         }
     </script>
 </body>
