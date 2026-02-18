@@ -78,8 +78,14 @@
 
     <script>
         async function generiereRoute() {
+<<<<<<< HEAD
             const apiKey = document.getElementById('apiKey').value.trim(); // .trim() entfernt versehentliche Leerzeichen!
             const land = document.getElementById('land').value || "einem überraschenden, spannenden Land";
+=======
+            // 1. Daten auslesen
+            const apiKey = document.getElementById('apiKey').value;
+            const land = document.getElementById('land').value || "einem überraschenden, spannenden Land.";
+>>>>>>> ad6053a091afa4484f8df316a83b3e4c0ab5a94e
             const jahreszeit = document.getElementById('jahreszeit').value || "der besten Reisezeit";
             const dauer = document.getElementById('dauer').value || "5";
             const interesse = document.getElementById('interesse').value || "lokale Highlights";
